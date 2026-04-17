@@ -57,6 +57,12 @@ export default function DashboardPage() {
     fat:      entries.reduce((s, e) => s + parseFloat(e.fat_g || 0), 0),
   }
 
+  if (!mounted) return (
+    <div className="p-4 md:p-6 max-w-4xl mx-auto flex flex-col gap-4">
+      {[1,2,3].map(i => <div key={i} className="h-32 rounded-2xl bg-slate-100 animate-pulse" />)}
+    </div>
+  )
+
   const calTarget  = metrics?.calorie_target  || 2000
   const protTarget = metrics?.protein_target_g || 150
   const carbTarget = metrics?.carbs_target_g   || 250
