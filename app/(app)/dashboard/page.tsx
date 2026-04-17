@@ -22,10 +22,13 @@ export default function DashboardPage() {
   const [plan, setPlan]         = useState<any>(null)
   const [fasting, setFasting]   = useState<any>(null)
   const [loading, setLoad]      = useState(true)
-  const [now, setNow]           = useState(Date.now())
+  const [now, setNow]           = useState(0)
+  const [mounted, setMounted]   = useState(false)
   const today = todayISO()
 
   useEffect(() => {
+    setMounted(true)
+    setNow(Date.now())
     const t = setInterval(() => setNow(Date.now()), 1000)
     return () => clearInterval(t)
   }, [])
@@ -68,12 +71,12 @@ export default function DashboardPage() {
     <div className="p-4 md:p-6 max-w-4xl mx-auto">
       <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">
-            {greeting()}, {profile?.full_name?.split(' ')[0] || 'Bienvenido'} 👋
+          <h1 className="text-2xl font-bold text-slate-800" suppressHydrationWarning>
+            {mounted ? greeting() : 'Hola'}, {profile?.full_name?.split(' ')[0] || 'Bienvenido'} 👋
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-1.5">
+          <p className="text-sm text-slate-500 mt-0.5 flex items-center gap-1.5" suppressHydrationWarning>
             <CalendarDays className="h-3.5 w-3.5" />
-            {formatDate(new Date(), "EEEE dd 'de' MMMM")}
+            {mounted ? formatDate(new Date(), "EEEE dd 'de' MMMM") : ''}
           </p>
         </div>
         <Link href="/registro">
