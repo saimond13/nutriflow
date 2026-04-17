@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useSignUp, useClerk } from '@clerk/nextjs'
+import { useSignUp } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -10,7 +10,6 @@ import { Leaf, CheckCircle } from 'lucide-react'
 
 export default function RegisterPage() {
   const { signUp, fetchStatus } = useSignUp()
-  const { setActive } = useClerk()
   const router = useRouter()
   const [form, setForm]       = useState({ full_name: '', email: '', password: '', confirm: '' })
   const [error, setError]     = useState('')
@@ -33,18 +32,25 @@ export default function RegisterPage() {
 
     try {
       const nameParts = form.full_name.trim().split(' ')
-      const result = await signUp.create({
+      const { error: signUpError } = await signUp.create({
         emailAddress: form.email,
         password:     form.password,
         firstName:    nameParts[0],
         lastName:     nameParts.slice(1).join(' ') || undefined,
       })
 
-      if (result.status === 'complete') {
-        await setActive({ session: result.createdSessionId })
+      if (signUpError) {
+        const msg = signUpError.longMessage || signUpError.message || 'Error al crear cuenta'
+        setError(msg.includes('email') || msg.includes('taken') ? 'Este email ya está registrado' : msg)
+        return
+      }
+
+      if (signUp.status === 'complete') {
+        await signUp.finalize()
         router.push('/onboarding')
-      } else if (result.unverifiedFields.includes('email_address')) {
-        await result.prepareEmailAddressVerification({ strategy: 'email_code' })
+      } else if (signUp.unverifiedFields.includes('email_address')) {
+        const { error: sendError } = await signUp.verifications.sendEmailCode()
+        if (sendError) { setError(sendError.message || 'Error al enviar código'); return }
         setVerifying(true)
       }
     } catch (err: unknown) {
@@ -61,9 +67,10 @@ export default function RegisterPage() {
     if (!signUp) return
     setLoading(true)
     try {
-      const verified = await signUp.attemptEmailAddressVerification({ code })
-      if (verified.status === 'complete') {
-        await setActive({ session: verified.createdSessionId })
+      const { error: verifyError } = await signUp.verifications.verifyEmailCode({ code })
+      if (verifyError) { setError(verifyError.longMessage || verifyError.message || 'Código incorrecto'); return }
+      if (signUp.status === 'complete') {
+        await signUp.finalize()
         router.push('/onboarding')
       }
     } catch {

@@ -34,14 +34,15 @@ export default function LoginPage() {
       }
 
       if (signIn.status === 'complete') {
-        await signIn.finalize()
+        const { error: finalizeError } = await signIn.finalize()
+        if (finalizeError) { setError(finalizeError.message || 'Error al iniciar sesión'); return }
         const res = await fetch('/api/auth/check-onboarding')
         const data = await res.json()
         router.push(data.completed ? '/dashboard' : '/onboarding')
       }
     } catch (err: unknown) {
-      const clerkErr = err as { errors?: Array<{ message: string }> }
-      const msg = clerkErr?.errors?.[0]?.message || 'Error al iniciar sesión'
+      const clerkErr = err as { errors?: Array<{ longMessage?: string; message: string }> }
+      const msg = clerkErr?.errors?.[0]?.longMessage || clerkErr?.errors?.[0]?.message || 'Error al iniciar sesión'
       setError(msg.includes('password') ? 'Contraseña incorrecta' :
                msg.includes('Identifier') ? 'Email no encontrado' : msg)
     } finally {
