@@ -47,7 +47,7 @@ export default function RegisterPage() {
 
       if (signUp.status === 'complete') {
         await signUp.finalize()
-        router.push('/onboarding')
+        window.location.href = '/onboarding'
       } else if (signUp.unverifiedFields.includes('email_address')) {
         const { error: sendError } = await signUp.verifications.sendEmailCode()
         if (sendError) { setError(sendError.message || 'Error al enviar código'); return }
@@ -71,7 +71,7 @@ export default function RegisterPage() {
       if (verifyError) { setError(verifyError.longMessage || verifyError.message || 'Código incorrecto'); return }
       if (signUp.status === 'complete') {
         await signUp.finalize()
-        router.push('/onboarding')
+        window.location.href = '/onboarding'
       }
     } catch {
       setError('Error al verificar. Intenta de nuevo.')

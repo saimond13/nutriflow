@@ -38,7 +38,7 @@ export default function LoginPage() {
         if (finalizeError) { setError(finalizeError.message || 'Error al iniciar sesión'); return }
         const res = await fetch('/api/auth/check-onboarding')
         const data = await res.json()
-        router.push(data.completed ? '/dashboard' : '/onboarding')
+        window.location.href = data.completed ? '/dashboard' : '/onboarding'
       }
     } catch (err: unknown) {
       const clerkErr = err as { errors?: Array<{ longMessage?: string; message: string }> }
