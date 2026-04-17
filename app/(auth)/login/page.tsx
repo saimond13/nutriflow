@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useSignIn } from '@clerk/nextjs'
+import { useSignIn, useClerk } from '@clerk/nextjs'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +9,7 @@ import { Leaf } from 'lucide-react'
 
 export default function LoginPage() {
   const { signIn, fetchStatus } = useSignIn()
+  const { setActive } = useClerk()
   const [email, setEmail]     = useState('')
   const [password, setPass]   = useState('')
   const [error, setError]     = useState('')
@@ -29,32 +30,31 @@ export default function LoginPage() {
 
       if (signInError) {
         const msg = signInError.longMessage || signInError.message || ''
-        setError(msg.includes('password') ? 'Contraseña incorrecta' :
-                 msg.includes('identifier') || msg.includes('Identifier') || msg.includes('No se encontró') ? 'Email no encontrado' :
-                 msg || 'Error al iniciar sesión')
+        setError(
+          msg.toLowerCase().includes('password') ? 'Contraseña incorrecta' :
+          msg.toLowerCase().includes('identifier') || msg.toLowerCase().includes('no se encontró') ? 'Email no encontrado' :
+          msg || 'Error al iniciar sesión'
+        )
         return
       }
 
       if (signIn.status === 'complete') {
-        const { error: finalizeError } = await signIn.finalize()
-        if (finalizeError) {
-          setError(finalizeError.longMessage || finalizeError.message || 'Error al activar sesión')
-          return
-        }
-        const res = await fetch('/api/auth/check-onboarding')
-        const data = await res.json()
-        window.location.href = data.completed ? '/dashboard' : '/onboarding'
+        await setActive({ session: signIn.createdSessionId })
+        const res = await fetch('/api/auth/check-onboarding').catch(() => null)
+        const data = res?.ok ? await res.json().catch(() => null) : null
+        window.location.href = data?.completed ? '/dashboard' : '/onboarding'
         return
       }
 
-      // Status no es 'complete' — situación inesperada
       setError('No se pudo completar el inicio de sesión. Intenta de nuevo.')
     } catch (err: unknown) {
       const clerkErr = err as { errors?: Array<{ longMessage?: string; message: string }> }
       const msg = clerkErr?.errors?.[0]?.longMessage || clerkErr?.errors?.[0]?.message || ''
-      setError(msg.includes('password') ? 'Contraseña incorrecta' :
-               msg.includes('Identifier') || msg.includes('identifier') ? 'Email no encontrado' :
-               msg || 'Error al iniciar sesión')
+      setError(
+        msg.toLowerCase().includes('password') ? 'Contraseña incorrecta' :
+        msg.toLowerCase().includes('identifier') ? 'Email no encontrado' :
+        msg || 'Error al iniciar sesión'
+      )
     } finally {
       setLoading(false)
     }
