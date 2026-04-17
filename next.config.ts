@@ -17,6 +17,8 @@ const securityHeaders = [
       "img-src 'self' data: blob: https:",
       // API calls to Clerk, OpenAI (server-side only), Neon
       "connect-src 'self' https://*.clerk.com https://*.clerk.accounts.dev https://accounts.nutriflow.mileadflow.com https://clerk.nutriflow.mileadflow.com wss: https://world.openfoodfacts.org",
+      // Clerk uses blob: Web Workers internally
+      "worker-src blob: 'self'",
       "frame-src 'none'",
       "object-src 'none'",
       "base-uri 'self'",

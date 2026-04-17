@@ -31,13 +31,17 @@ export default clerkMiddleware(async (auth, req) => {
 
   const { userId } = await auth()
 
+  // Ya autenticado → redirigir fuera de auth pages
+  if (userId && isAuthRoute(req)) {
+    return NextResponse.redirect(new URL('/dashboard', req.url))
+  }
+
   // Rutas públicas — dejar pasar
   if (isPublicRoute(req)) return NextResponse.next()
 
   // Rutas protegidas sin sesión → login
   if (!userId) {
-    const loginUrl = new URL('/login', req.url)
-    return NextResponse.redirect(loginUrl)
+    return NextResponse.redirect(new URL('/login', req.url))
   }
 
   return NextResponse.next()
