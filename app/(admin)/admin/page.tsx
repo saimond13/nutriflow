@@ -22,6 +22,8 @@ export default function AdminPage() {
   const [selected, setSelected] = useState<any>(null)
   const [notes, setNotes]       = useState('')
   const [saving, setSave]       = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [confirmDel, setConfirmDel] = useState(false)
   const [msg, setMsg]           = useState('')
 
   useEffect(() => {
@@ -52,6 +54,22 @@ export default function AdminPage() {
     } finally {
       setLoad(false)
     }
+  }
+
+  async function deleteUser(userId: string) {
+    setDeleting(true)
+    setMsg('')
+    const res = await fetch(`/api/admin/delete-user?user_id=${userId}`, { method: 'DELETE' })
+    const data = await res.json()
+    if (data.success) {
+      setMsg('Usuario eliminado correctamente')
+      await loadUsers()
+      setSelected(null)
+      setConfirmDel(false)
+    } else {
+      setMsg(`Error: ${data.error}`)
+    }
+    setDeleting(false)
   }
 
   async function changePlan(userId: string, plan: 'free' | 'premium') {
@@ -202,7 +220,7 @@ export default function AdminPage() {
       </Card>
 
       {/* Modal de gestión de plan */}
-      <Dialog open={!!selected} onOpenChange={() => setSelected(null)}>
+      <Dialog open={!!selected} onOpenChange={() => { setSelected(null); setConfirmDel(false) }}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Gestionar plan de usuario</DialogTitle>
@@ -213,6 +231,7 @@ export default function AdminPage() {
               <div className="rounded-xl bg-slate-50 p-4">
                 <p className="font-semibold text-slate-800">{selected.full_name || selected.email}</p>
                 <p className="text-sm text-slate-500">{selected.email}</p>
+                <p className="text-xs text-slate-400 mt-1 font-mono break-all">ID: {selected.id}</p>
                 <div className="flex items-center gap-2 mt-2">
                   <span className="text-sm text-slate-600">Plan actual:</span>
                   {selected.plan === 'premium'
@@ -261,6 +280,27 @@ export default function AdminPage() {
                   Último cambio: {formatDate(selected.sub_updated_at)}
                 </p>
               )}
+
+              {/* Zona peligrosa: eliminar usuario */}
+              <div className="border-t border-slate-100 pt-3">
+                {!confirmDel ? (
+                  <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-50 w-full"
+                    onClick={() => setConfirmDel(true)}>
+                    Eliminar usuario de la base de datos
+                  </Button>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-red-600 text-center font-medium">¿Confirmar eliminación? Esta acción no se puede deshacer.</p>
+                    <div className="flex gap-2">
+                      <Button variant="outline" size="sm" className="flex-1" onClick={() => setConfirmDel(false)}>Cancelar</Button>
+                      <Button size="sm" className="flex-1 bg-red-500 hover:bg-red-600 text-white"
+                        loading={deleting} onClick={() => deleteUser(selected.id)}>
+                        Sí, eliminar
+                      </Button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
         </DialogContent>
