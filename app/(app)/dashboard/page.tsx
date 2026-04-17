@@ -65,8 +65,8 @@ export default function DashboardPage() {
   entries.forEach(e => { if (!byMeal[e.meal_type]) byMeal[e.meal_type] = []; byMeal[e.meal_type].push(e) })
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="p-4 md:p-6 max-w-4xl mx-auto">
+      <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">
             {greeting()}, {profile?.full_name?.split(' ')[0] || 'Bienvenido'} 👋
@@ -107,13 +107,13 @@ export default function DashboardPage() {
       </Card>
 
       {/* Macros */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-3 gap-2 md:gap-4 mb-6">
         <MacroCard label="Proteínas"     value={totals.protein} target={Number(protTarget)} icon={<Beef className="h-4 w-4" />}    color="emerald" unit="g" />
         <MacroCard label="Carbohidratos" value={totals.carbs}   target={Number(carbTarget)} icon={<Wheat className="h-4 w-4" />}   color="amber"   unit="g" />
         <MacroCard label="Grasas"        value={totals.fat}     target={Number(fatTarget)}  icon={<Droplets className="h-4 w-4" />} color="blue"    unit="g" />
       </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-4 md:gap-6 lg:grid-cols-2">
         {/* Comidas de hoy */}
         <Card>
           <CardHeader>

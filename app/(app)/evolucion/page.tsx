@@ -58,10 +58,10 @@ export default function EvolucionPage() {
   }))
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <div className="mb-6 flex items-center justify-between">
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
+      <div className="mb-6 flex items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Mi Evolución</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-800">Mi Evolución</h1>
           <p className="text-sm text-slate-500">Seguimiento de peso y composición corporal</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
@@ -99,7 +99,7 @@ export default function EvolucionPage() {
       </div>
 
       {/* Stats */}
-      <div className="grid grid-cols-2 gap-4 mb-6 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 mb-6 lg:grid-cols-4">
         <StatCard
           label="Peso actual"
           value={latest ? `${parseFloat(latest.weight_kg).toFixed(1)} kg` : '—'}

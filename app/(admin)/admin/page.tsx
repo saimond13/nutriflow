@@ -78,9 +78,9 @@ export default function AdminPage() {
   const totalCount   = users.length
 
   return (
-    <div className="p-6">
+    <div className="p-4 md:p-6">
       {/* Stats */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-6">
         <Card>
           <CardContent className="p-5 flex items-center gap-4">
             <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100">

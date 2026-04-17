@@ -39,7 +39,7 @@ export default function PerfilPage() {
   }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto">
       <h1 className="text-2xl font-bold text-slate-800 mb-6">Mi Perfil</h1>
 
       {/* Info del usuario */}
@@ -99,7 +99,7 @@ export default function PerfilPage() {
         <Card className="mb-4">
           <CardHeader><CardTitle className="flex items-center gap-2"><Target className="h-4 w-4" /> Mis métricas</CardTitle></CardHeader>
           <CardContent className="p-5 pt-0">
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <InfoRow label="Objetivo" value={GOAL_LABELS[metrics.goal_type as string] || metrics.goal_type as string} />
               <InfoRow label="Actividad" value={ACTIVITY_LABELS[metrics.activity_level as string] || metrics.activity_level as string} />
               <InfoRow label="Peso actual" value={metrics.weight_kg ? `${Number(metrics.weight_kg).toFixed(1)} kg` : '—'} />
@@ -116,7 +116,7 @@ export default function PerfilPage() {
         <Card className="mb-4">
           <CardHeader><CardTitle className="flex items-center gap-2"><Utensils className="h-4 w-4" /> Preferencias</CardTitle></CardHeader>
           <CardContent className="p-5 pt-0">
-            <div className="grid grid-cols-2 gap-3 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
               <InfoRow label="Dieta" value={DIET_LABELS[prefs.diet_type as string] || prefs.diet_type as string} />
               <InfoRow label="Complejidad" value={prefs.meal_complexity as string || '—'} />
               <InfoRow label="Personas" value={prefs.people_count ? `${prefs.people_count}` : '—'} />

@@ -175,7 +175,7 @@ export default function RegistroPage() {
   entries.forEach(e => { if (!byMeal[e.meal_type]) byMeal[e.meal_type] = []; byMeal[e.meal_type].push(e) })
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto">
       {/* Scanner de código de barras (pantalla completa) */}
       {scanning && (
         <BarcodeScanner
@@ -184,9 +184,9 @@ export default function RegistroPage() {
         />
       )}
 
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Mi Registro</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-800">Mi Registro</h1>
           <p className="text-sm text-slate-500">Registra lo que comes cada día</p>
         </div>
 
@@ -407,7 +407,7 @@ export default function RegistroPage() {
                 <div className="rounded-xl bg-emerald-50 border border-emerald-100 p-4">
                   <p className="font-semibold text-slate-800 mb-1">{barcodeResult.food_name}</p>
                   <p className="text-xs text-slate-500 mb-3">Valores por 100g</p>
-                  <div className="grid grid-cols-4 gap-2 text-center">
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center">
                     {([['kcal', barcodeResult.calories], ['Prot', `${barcodeResult.protein_g}g`], ['Carb', `${barcodeResult.carbs_g}g`], ['Gras', `${barcodeResult.fat_g}g`]] as [string,any][]).map(([l,v]) => (
                       <div key={l} className="rounded-lg bg-white p-2 border border-emerald-100">
                         <p className="text-xs text-slate-400">{l}</p>

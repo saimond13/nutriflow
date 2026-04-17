@@ -114,7 +114,7 @@ export default function AyunoPage() {
 
   if (loading) {
     return (
-      <div className="p-6 max-w-2xl mx-auto">
+      <div className="p-4 md:p-6 max-w-2xl mx-auto">
         <div className="h-8 w-48 bg-slate-100 rounded-xl animate-pulse mb-6" />
         <div className="h-64 bg-slate-100 rounded-2xl animate-pulse" />
       </div>
@@ -122,7 +122,7 @@ export default function AyunoPage() {
   }
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-4 md:p-6 max-w-2xl mx-auto">
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
           <Timer className="h-6 w-6 text-emerald-500" />
@@ -135,7 +135,7 @@ export default function AyunoPage() {
 
       {/* Stats */}
       {totalCount > 0 && (
-        <div className="grid grid-cols-3 gap-3 mb-6">
+        <div className="grid grid-cols-3 gap-2 md:gap-3 mb-6">
           <Card>
             <CardContent className="p-4 text-center">
               <p className="text-2xl font-bold text-slate-800">{totalCount}</p>

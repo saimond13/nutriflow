@@ -52,9 +52,9 @@ export default function AsistentePage() {
   }
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] max-w-2xl mx-auto">
+    <div className="flex flex-col h-[calc(100vh-3.5rem)] md:h-[calc(100vh-4rem)] max-w-2xl mx-auto">
       {/* Header */}
-      <div className="px-6 py-4 border-b border-slate-100">
+      <div className="px-4 md:px-6 py-4 border-b border-slate-100">
         <div className="flex items-center gap-3">
           <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-500">
             <Sparkles className="h-5 w-5 text-white" />
@@ -72,7 +72,7 @@ export default function AsistentePage() {
       </div>
 
       {/* Mensajes */}
-      <div className="flex-1 overflow-y-auto px-6 py-4 flex flex-col gap-4">
+      <div className="flex-1 overflow-y-auto px-4 md:px-6 py-4 flex flex-col gap-4">
         {messages.length === 0 && (
           <div className="flex flex-col items-center gap-4 py-12 text-center">
             <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-emerald-100">
@@ -111,7 +111,7 @@ export default function AsistentePage() {
               }
             </div>
             <div className={cn(
-              'rounded-2xl px-4 py-3 text-sm max-w-[80%] leading-relaxed',
+              'rounded-2xl px-4 py-3 text-sm max-w-[90%] md:max-w-[80%] leading-relaxed',
               m.role === 'user'
                 ? 'bg-emerald-500 text-white rounded-tr-sm'
                 : 'bg-slate-100 text-slate-700 rounded-tl-sm'
@@ -149,7 +149,7 @@ export default function AsistentePage() {
       </div>
 
       {/* Input */}
-      <div className="px-6 py-4 border-t border-slate-100">
+      <div className="px-4 md:px-6 py-4 border-t border-slate-100">
         <div className="flex gap-3">
           <Textarea
             placeholder="Escribe tu pregunta nutricional..."

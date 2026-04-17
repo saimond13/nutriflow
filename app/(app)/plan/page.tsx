@@ -68,10 +68,10 @@ export default function PlanPage() {
   })
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-4 md:p-6 max-w-3xl mx-auto">
       <div className="mb-6 flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800">Plato Semanal</h1>
+          <h1 className="text-xl md:text-2xl font-bold text-slate-800">Plato Semanal</h1>
           <p className="text-sm text-slate-500">Plan de comidas personalizado con IA</p>
         </div>
         <div className="flex gap-2">
