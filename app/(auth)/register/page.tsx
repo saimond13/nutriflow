@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useSignUp } from '@clerk/nextjs'
+import { useSignUp, useClerk } from '@clerk/nextjs'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,8 @@ import { Label } from '@/components/ui/label'
 import { Leaf, CheckCircle } from 'lucide-react'
 
 export default function RegisterPage() {
-  const { signUp, setActive, fetchStatus } = useSignUp()
+  const { signUp, fetchStatus } = useSignUp()
+  const { setActive } = useClerk()
   const router = useRouter()
   const [form, setForm]       = useState({ full_name: '', email: '', password: '', confirm: '' })
   const [error, setError]     = useState('')
@@ -40,7 +41,7 @@ export default function RegisterPage() {
       })
 
       if (signUp.status === 'complete') {
-        await setActive!({ session: signUp.createdSessionId })
+        await setActive({ session: signUp.createdSessionId })
         router.push('/onboarding')
       } else if (signUp.unverifiedFields.includes('email_address')) {
         await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
@@ -62,7 +63,7 @@ export default function RegisterPage() {
     try {
       await signUp.attemptEmailAddressVerification({ code })
       if (signUp.status === 'complete') {
-        await setActive!({ session: signUp.createdSessionId })
+        await setActive({ session: signUp.createdSessionId })
         router.push('/onboarding')
       }
     } catch {
