@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useSignIn, useClerk } from '@clerk/nextjs'
+import { useSignIn } from '@clerk/nextjs'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,7 +9,6 @@ import { Leaf } from 'lucide-react'
 
 export default function LoginPage() {
   const { signIn, fetchStatus } = useSignIn()
-  const { setActive } = useClerk()
   const [email, setEmail]     = useState('')
   const [password, setPass]   = useState('')
   const [error, setError]     = useState('')
@@ -38,8 +37,8 @@ export default function LoginPage() {
         return
       }
 
-      if (signIn.status === 'complete') {
-        await setActive({ session: signIn.createdSessionId })
+      const { error: finalizeError } = await signIn.finalize()
+      if (!finalizeError) {
         const res = await fetch('/api/auth/check-onboarding').catch(() => null)
         const data = res?.ok ? await res.json().catch(() => null) : null
         window.location.href = data?.completed ? '/dashboard' : '/onboarding'
