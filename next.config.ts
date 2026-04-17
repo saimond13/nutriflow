@@ -11,7 +11,7 @@ const securityHeaders = [
     value: [
       "default-src 'self'",
       // Clerk needs these for its hosted UI and API
-      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.com https://*.clerk.accounts.dev https://accounts.nutriflow.mileadflow.com https://clerk.nutriflow.mileadflow.com",
+      "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://*.clerk.com https://*.clerk.accounts.dev https://accounts.nutriflow.mileadflow.com https://clerk.nutriflow.mileadflow.com https://challenges.cloudflare.com",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",
@@ -19,7 +19,7 @@ const securityHeaders = [
       "connect-src 'self' https://*.clerk.com https://*.clerk.accounts.dev https://accounts.nutriflow.mileadflow.com https://clerk.nutriflow.mileadflow.com wss: https://world.openfoodfacts.org",
       // Clerk uses blob: Web Workers internally
       "worker-src blob: 'self'",
-      "frame-src 'none'",
+      "frame-src https://challenges.cloudflare.com https://*.clerk.com https://*.clerk.accounts.dev https://accounts.nutriflow.mileadflow.com",
       "object-src 'none'",
       "base-uri 'self'",
       "form-action 'self'",
