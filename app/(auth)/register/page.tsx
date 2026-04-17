@@ -33,18 +33,18 @@ export default function RegisterPage() {
 
     try {
       const nameParts = form.full_name.trim().split(' ')
-      await signUp.create({
+      const result = await signUp.create({
         emailAddress: form.email,
         password:     form.password,
         firstName:    nameParts[0],
         lastName:     nameParts.slice(1).join(' ') || undefined,
       })
 
-      if (signUp.status === 'complete') {
-        await setActive({ session: signUp.createdSessionId })
+      if (result.status === 'complete') {
+        await setActive({ session: result.createdSessionId })
         router.push('/onboarding')
-      } else if (signUp.unverifiedFields.includes('email_address')) {
-        await signUp.prepareEmailAddressVerification({ strategy: 'email_code' })
+      } else if (result.unverifiedFields.includes('email_address')) {
+        await result.prepareEmailAddressVerification({ strategy: 'email_code' })
         setVerifying(true)
       }
     } catch (err: unknown) {
@@ -61,9 +61,9 @@ export default function RegisterPage() {
     if (!signUp) return
     setLoading(true)
     try {
-      await signUp.attemptEmailAddressVerification({ code })
-      if (signUp.status === 'complete') {
-        await setActive({ session: signUp.createdSessionId })
+      const verified = await signUp.attemptEmailAddressVerification({ code })
+      if (verified.status === 'complete') {
+        await setActive({ session: verified.createdSessionId })
         router.push('/onboarding')
       }
     } catch {
