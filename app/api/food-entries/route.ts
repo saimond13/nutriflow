@@ -2,13 +2,20 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { db, foodEntries, progressLogs, userMetrics } from '@/lib/db'
 import { eq, and } from 'drizzle-orm'
+import { LIMITERS, rateLimitResponse } from '@/lib/rate-limit'
+import { FoodEntrySchema } from '@/lib/validators/api'
 
 export async function GET(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const rl = LIMITERS.api(userId)
+  if (!rl.success) return rateLimitResponse(rl.reset)
+
   const date = req.nextUrl.searchParams.get('date')
-  if (!date) return NextResponse.json({ error: 'date requerido' }, { status: 400 })
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return NextResponse.json({ error: 'date inválido' }, { status: 400 })
+  }
 
   const entries = await db.select().from(foodEntries)
     .where(and(eq(foodEntries.user_id, userId), eq(foodEntries.logged_date, date)))
@@ -21,25 +28,32 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const rl = LIMITERS.api(userId)
+  if (!rl.success) return rateLimitResponse(rl.reset)
+
   const body = await req.json()
+  const parsed = FoodEntrySchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+  }
+
+  const d = parsed.data
   const [entry] = await db.insert(foodEntries).values({
-    user_id:     userId,
-    logged_date: body.logged_date,
-    meal_type:   body.meal_type ?? 'other',
-    food_name:   body.food_name,
-    quantity_g:  String(body.quantity_g ?? 100),
-    calories:    String(body.calories ?? 0),
-    protein_g:   String(body.protein_g ?? 0),
-    carbs_g:     String(body.carbs_g ?? 0),
-    fat_g:       String(body.fat_g ?? 0),
-    source:      body.source ?? 'manual',
-    notes:       body.notes ?? null,
-    portion_label: body.portion_label ?? null,
+    user_id:       userId,
+    logged_date:   d.logged_date,
+    meal_type:     d.meal_type,
+    food_name:     d.food_name,
+    quantity_g:    String(d.quantity_g),
+    calories:      String(d.calories),
+    protein_g:     String(d.protein_g),
+    carbs_g:       String(d.carbs_g),
+    fat_g:         String(d.fat_g),
+    source:        d.source,
+    notes:         d.notes ?? null,
+    portion_label: d.portion_label ?? null,
   }).returning()
 
-  // Recalcular progress_log del día
-  await recalcProgressLog(userId, body.logged_date)
-
+  await recalcProgressLog(userId, d.logged_date)
   return NextResponse.json({ entry })
 }
 
@@ -47,8 +61,13 @@ export async function DELETE(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const rl = LIMITERS.api(userId)
+  if (!rl.success) return rateLimitResponse(rl.reset)
+
   const id = req.nextUrl.searchParams.get('id')
-  if (!id) return NextResponse.json({ error: 'id requerido' }, { status: 400 })
+  if (!id || !/^[0-9a-f-]{36}$/.test(id)) {
+    return NextResponse.json({ error: 'id inválido' }, { status: 400 })
+  }
 
   const [deleted] = await db.delete(foodEntries)
     .where(and(eq(foodEntries.id, id), eq(foodEntries.user_id, userId)))

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
+import { LIMITERS, rateLimitResponse } from '@/lib/rate-limit'
 import { openai, FREE_LIMITS } from '@/lib/openai/client'
 import { buildMealPlanPrompt } from '@/lib/openai/prompts'
 import { MealPlanResponseSchema } from '@/lib/openai/validators'
@@ -10,6 +11,9 @@ import { eq, and, ne } from 'drizzle-orm'
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+  const rl = LIMITERS.ai(userId)
+  if (!rl.success) return rateLimitResponse(rl.reset)
 
   // Verificar límite free
   const sub = await getSubscription(userId)
@@ -40,9 +44,7 @@ export async function POST(req: NextRequest) {
   let planData: any
   try {
     planData = MealPlanResponseSchema.parse(JSON.parse(raw))
-  } catch (e: any) {
-    console.error('AI plan validation error:', JSON.stringify(e?.errors ?? e, null, 2))
-    console.error('Raw response (first 500 chars):', raw.slice(0, 500))
+  } catch {
     return NextResponse.json({ error: 'La IA devolvió un plan inválido. Intenta de nuevo.' }, { status: 500 })
   }
 

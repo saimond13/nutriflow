@@ -2,10 +2,15 @@ import { NextRequest, NextResponse } from 'next/server'
 import { auth } from '@clerk/nextjs/server'
 import { db, fastingSessions } from '@/lib/db'
 import { eq, and, isNull, desc } from 'drizzle-orm'
+import { LIMITERS, rateLimitResponse } from '@/lib/rate-limit'
+import { FastingActionSchema } from '@/lib/validators/api'
 
 export async function GET() {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+  const rl = LIMITERS.fasting(userId)
+  if (!rl.success) return rateLimitResponse(rl.reset)
 
   const sessions = await db
     .select()
@@ -24,11 +29,22 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const rl = LIMITERS.fasting(userId)
+  if (!rl.success) return rateLimitResponse(rl.reset)
+
   const body = await req.json()
-  const { action, protocol, notes } = body
+  const parsed = FastingActionSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+  }
+
+  const { action, protocol, notes } = parsed.data
 
   if (action === 'start') {
-    // End any existing active session first
+    if (!protocol) {
+      return NextResponse.json({ error: 'protocol requerido para iniciar ayuno' }, { status: 400 })
+    }
+
     await db
       .update(fastingSessions)
       .set({ ended_at: new Date(), broken: true })
@@ -40,7 +56,7 @@ export async function POST(req: NextRequest) {
       '20:4': { fast: 20, eat: 4 },
       'omad': { fast: 23, eat: 1 },
     }
-    const { fast, eat } = protocols[protocol] ?? protocols['16:8']
+    const { fast, eat } = protocols[protocol]
 
     const [session] = await db.insert(fastingSessions).values({
       user_id:    userId,

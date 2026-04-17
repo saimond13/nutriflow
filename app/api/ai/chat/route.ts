@@ -4,10 +4,15 @@ import { openai, FREE_LIMITS } from '@/lib/openai/client'
 import { buildChatSystemPrompt } from '@/lib/openai/prompts'
 import { getSubscription, getUsage, incrementUsage, getMetrics, getPrefs } from '@/lib/db/queries'
 import { db, chatMessages } from '@/lib/db'
+import { LIMITERS, rateLimitResponse } from '@/lib/rate-limit'
+import { ChatSchema } from '@/lib/validators/api'
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+  const rl = LIMITERS.ai(userId)
+  if (!rl.success) return rateLimitResponse(rl.reset)
 
   const sub = await getSubscription(userId)
   const isPremium = sub?.plan === 'premium'
@@ -19,8 +24,13 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const { messages, session_id } = await req.json()
-  if (!messages?.length) return NextResponse.json({ error: 'Mensajes requeridos' }, { status: 400 })
+  const body = await req.json()
+  const parsed = ChatSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+  }
+
+  const { messages, session_id } = parsed.data
 
   const metrics = await getMetrics(userId)
   const prefs   = await getPrefs(userId)

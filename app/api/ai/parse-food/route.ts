@@ -5,10 +5,15 @@ import { buildFoodParsePrompt } from '@/lib/openai/prompts'
 import { FoodParseResponseSchema } from '@/lib/openai/validators'
 import { getSubscription, getUsage, incrementUsage } from '@/lib/db/queries'
 import { db, aiGenerations } from '@/lib/db'
+import { LIMITERS, rateLimitResponse } from '@/lib/rate-limit'
+import { ParseFoodSchema } from '@/lib/validators/api'
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
+
+  const rl = LIMITERS.ai(userId)
+  if (!rl.success) return rateLimitResponse(rl.reset)
 
   const sub = await getSubscription(userId)
   const isPremium = sub?.plan === 'premium'
@@ -20,13 +25,17 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const { text, servings } = await req.json()
-  if (!text?.trim()) return NextResponse.json({ error: 'Texto requerido' }, { status: 400 })
+  const body = await req.json()
+  const parsedInput = ParseFoodSchema.safeParse(body)
+  if (!parsedInput.success) {
+    return NextResponse.json({ error: 'Datos inválidos', details: parsedInput.error.flatten().fieldErrors }, { status: 400 })
+  }
+  const { text, servings } = parsedInput.data
 
   const start = Date.now()
   const completion = await openai.chat.completions.create({
     model: 'gpt-4o-mini',
-    messages: [{ role: 'user', content: buildFoodParsePrompt(text, Math.max(1, parseInt(servings) || 1)) }],
+    messages: [{ role: 'user', content: buildFoodParsePrompt(text, servings) }],
     response_format: { type: 'json_object' },
     temperature: 0.2,
     max_tokens: 1200,

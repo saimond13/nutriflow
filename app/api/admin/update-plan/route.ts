@@ -3,17 +3,25 @@ import { auth } from '@clerk/nextjs/server'
 import { getUserProfile } from '@/lib/db/queries'
 import { db, subscriptions, subscriptionHistory } from '@/lib/db'
 import { eq } from 'drizzle-orm'
+import { LIMITERS, rateLimitResponse } from '@/lib/rate-limit'
+import { AdminUpdatePlanSchema } from '@/lib/validators/api'
 
 export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
+  const rl = LIMITERS.api(userId)
+  if (!rl.success) return rateLimitResponse(rl.reset)
+
   const profile = await getUserProfile(userId)
   if (!profile?.is_admin) return NextResponse.json({ error: 'Acceso denegado' }, { status: 403 })
 
-  const { user_id, plan, notes } = await req.json()
-  if (!user_id || !plan) return NextResponse.json({ error: 'Datos requeridos' }, { status: 400 })
-  if (!['free', 'premium'].includes(plan)) return NextResponse.json({ error: 'Plan inválido' }, { status: 400 })
+  const body = await req.json()
+  const parsed = AdminUpdatePlanSchema.safeParse(body)
+  if (!parsed.success) {
+    return NextResponse.json({ error: 'Datos inválidos', details: parsed.error.flatten().fieldErrors }, { status: 400 })
+  }
+  const { user_id, plan, notes } = parsed.data
 
   // Obtener plan anterior para el historial
   const [currentSub] = await db.select().from(subscriptions).where(eq(subscriptions.user_id, user_id))

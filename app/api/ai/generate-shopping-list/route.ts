@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
+import { randomBytes } from 'crypto'
 import { auth } from '@clerk/nextjs/server'
+import { LIMITERS, rateLimitResponse } from '@/lib/rate-limit'
 import { openai } from '@/lib/openai/client'
 import { buildShoppingListPrompt } from '@/lib/openai/prompts'
 import { ShoppingListResponseSchema } from '@/lib/openai/validators'
@@ -11,8 +13,14 @@ export async function POST(req: NextRequest) {
   const { userId } = await auth()
   if (!userId) return NextResponse.json({ error: 'No autorizado' }, { status: 401 })
 
-  const { plan_id } = await req.json()
-  if (!plan_id) return NextResponse.json({ error: 'plan_id requerido' }, { status: 400 })
+  const rl = LIMITERS.ai(userId)
+  if (!rl.success) return rateLimitResponse(rl.reset)
+
+  const body = await req.json()
+  const plan_id = body?.plan_id
+  if (!plan_id || typeof plan_id !== 'string') {
+    return NextResponse.json({ error: 'plan_id requerido' }, { status: 400 })
+  }
 
   const [plan] = await db.select().from(mealPlans)
     .where(and(eq(mealPlans.id, plan_id), eq(mealPlans.user_id, userId)))
@@ -55,8 +63,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Error al procesar lista de compras' }, { status: 500 })
   }
 
-  const shareToken = Buffer.from(Math.random().toString(36) + Date.now().toString(36))
-    .toString('base64').replace(/[^a-z0-9]/gi, '').slice(0, 20)
+  const shareToken = randomBytes(16).toString('hex')
 
   const [savedList] = await db.insert(shoppingLists).values({
     user_id: userId,
