@@ -278,6 +278,21 @@ export const savedPreferences = pgTable('saved_preferences', {
   updated_at: timestamp('updated_at').defaultNow().notNull(),
 }, t => [uniqueIndex('prefs_key_idx').on(t.user_id, t.key)])
 
+// ── Fasting sessions ───────────────────────────────────────────
+export const fastingSessions = pgTable('fasting_sessions', {
+  id:         uuid('id').defaultRandom().primaryKey(),
+  user_id:    text('user_id').notNull().references(() => profiles.id, { onDelete: 'cascade' }),
+  protocol:   text('protocol').notNull(), // '16:8', '18:6', '20:4', 'omad'
+  fast_hours: integer('fast_hours').notNull(),
+  eat_hours:  integer('eat_hours').notNull(),
+  started_at: timestamp('started_at').notNull(),
+  ended_at:   timestamp('ended_at'),
+  completed:  boolean('completed').default(false),
+  broken:     boolean('broken').default(false),
+  notes:      text('notes'),
+  created_at: timestamp('created_at').defaultNow().notNull(),
+}, t => [index('fasting_user_idx').on(t.user_id)])
+
 // ── Relations ──────────────────────────────────────────────────
 export const profilesRelations = relations(profiles, ({ one, many }) => ({
   subscription:        one(subscriptions,      { fields: [profiles.id], references: [subscriptions.user_id] }),

@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button'
 import { Progress } from '@/components/ui/progress'
 import { Badge } from '@/components/ui/badge'
 import { formatDate, todayISO } from '@/lib/utils/date'
-import { CalendarDays, Plus, Flame, Beef, Wheat, Droplets, TrendingUp, ShoppingCart, Sparkles } from 'lucide-react'
+import { CalendarDays, Plus, Flame, Beef, Wheat, Droplets, TrendingUp, ShoppingCart, Sparkles, Timer } from 'lucide-react'
 
 const MEAL_LABELS: Record<string, string> = {
   breakfast: '🌅 Desayuno', morning_snack: '🍎 Merienda AM',
@@ -18,20 +18,30 @@ const MEAL_LABELS: Record<string, string> = {
 export default function DashboardPage() {
   const metrics = useAuthStore(s => s.metrics)
   const profile = useAuthStore(s => s.profile)
-  const [entries, setEntries] = useState<any[]>([])
-  const [plan, setPlan]       = useState<any>(null)
-  const [loading, setLoad]    = useState(true)
+  const [entries, setEntries]   = useState<any[]>([])
+  const [plan, setPlan]         = useState<any>(null)
+  const [fasting, setFasting]   = useState<any>(null)
+  const [loading, setLoad]      = useState(true)
+  const [now, setNow]           = useState(Date.now())
   const today = todayISO()
 
+  useEffect(() => {
+    const t = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(t)
+  }, [])
+
   const load = useCallback(async () => {
-    const [entriesRes, planRes] = await Promise.all([
+    const [entriesRes, planRes, fastingRes] = await Promise.all([
       fetch(`/api/food-entries?date=${today}`),
       fetch('/api/meal-plans?active=true'),
+      fetch('/api/fasting'),
     ])
     const { entries: e } = await entriesRes.json()
     const { plan: p }    = await planRes.json()
+    const { active: f }  = await fastingRes.json()
     setEntries(e || [])
     setPlan(p || null)
+    setFasting(f || null)
     setLoad(false)
   }, [today])
 
@@ -170,6 +180,9 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
+          {/* Ayuno widget */}
+          <FastingWidget fasting={fasting} now={now} />
+
           <div className="grid grid-cols-2 gap-3">
             <Link href="/canasta">
               <Card className="hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer h-full">
@@ -213,6 +226,68 @@ function MacroCard({ label, value, target, icon, color, unit }: { label: string;
         <Progress value={pct} color={color} />
       </CardContent>
     </Card>
+  )
+}
+
+function pad(n: number) { return String(n).padStart(2, '0') }
+
+function FastingWidget({ fasting, now }: { fasting: any; now: number }) {
+  if (!fasting) {
+    return (
+      <Link href="/ayuno">
+        <Card className="hover:border-emerald-200 hover:shadow-md transition-all cursor-pointer">
+          <CardContent className="p-4 flex items-center gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 shrink-0">
+              <Timer className="h-5 w-5 text-slate-500" />
+            </div>
+            <div>
+              <p className="text-sm font-medium text-slate-700">Ayuno Intermitente</p>
+              <p className="text-xs text-slate-400">Iniciar sesión de ayuno</p>
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+    )
+  }
+
+  const startedAt = new Date(fasting.started_at).getTime()
+  const fastMs    = fasting.fast_hours * 3600 * 1000
+  const eatMs     = fasting.eat_hours  * 3600 * 1000
+  const eatStart  = startedAt + fastMs
+  const eatEnd    = eatStart + eatMs
+
+  const isFasting = now < eatStart
+  const remaining = isFasting ? eatStart - now : eatEnd - now
+  const total     = isFasting ? fastMs : eatMs
+  const pct       = Math.min(100, Math.round(((total - remaining) / total) * 100))
+
+  const s   = Math.max(0, Math.floor(remaining / 1000))
+  const h   = Math.floor(s / 3600)
+  const m   = Math.floor((s % 3600) / 60)
+  const sec = s % 60
+
+  return (
+    <Link href="/ayuno">
+      <Card className={`hover:shadow-md transition-all cursor-pointer border-2 ${isFasting ? 'border-blue-200 bg-blue-50/30' : 'border-emerald-200 bg-emerald-50/30'}`}>
+        <CardContent className="p-4">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-2">
+              <Timer className={`h-4 w-4 ${isFasting ? 'text-blue-500' : 'text-emerald-500'}`} />
+              <p className="text-sm font-medium text-slate-700">
+                {isFasting ? '🔵 Ayunando' : '🟢 Ventana de comida'} · {fasting.protocol}
+              </p>
+            </div>
+          </div>
+          <p className="text-2xl font-mono font-bold text-slate-800 tabular-nums">
+            {`${pad(h)}:${pad(m)}:${pad(sec)}`}
+          </p>
+          <p className="text-xs text-slate-400 mb-2">
+            {isFasting ? 'hasta poder comer' : 'tiempo restante'}
+          </p>
+          <Progress value={pct} color={isFasting ? 'blue' : 'emerald'} />
+        </CardContent>
+      </Card>
+    </Link>
   )
 }
 

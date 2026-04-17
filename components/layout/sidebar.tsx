@@ -7,13 +7,14 @@ import { Badge } from '@/components/ui/badge'
 import { cn } from '@/lib/utils/cn'
 import {
   Leaf, LayoutDashboard, BookOpen, CalendarDays, ShoppingCart,
-  TrendingUp, MessageSquare, User, LogOut, Crown, Shield,
+  TrendingUp, MessageSquare, User, LogOut, Crown, Shield, Timer,
 } from 'lucide-react'
 
 const NAV = [
   { href: '/dashboard', label: 'Inicio',             icon: LayoutDashboard },
   { href: '/registro',  label: 'Mi Registro',         icon: BookOpen        },
   { href: '/plan',      label: 'Plato Semanal',       icon: CalendarDays    },
+  { href: '/ayuno',     label: 'Ayuno',               icon: Timer           },
   { href: '/canasta',   label: 'Canasta Inteligente', icon: ShoppingCart    },
   { href: '/evolucion', label: 'Mi Evolución',        icon: TrendingUp      },
   { href: '/asistente', label: 'NutriBot',            icon: MessageSquare   },
