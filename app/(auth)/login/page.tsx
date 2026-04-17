@@ -39,9 +39,7 @@ export default function LoginPage() {
 
       const { error: finalizeError } = await signIn.finalize()
       if (!finalizeError) {
-        const res = await fetch('/api/auth/check-onboarding').catch(() => null)
-        const data = res?.ok ? await res.json().catch(() => null) : null
-        window.location.href = data?.completed ? '/dashboard' : '/onboarding'
+        window.location.href = '/dashboard'
         return
       }
 
