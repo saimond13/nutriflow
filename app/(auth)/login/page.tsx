@@ -1,7 +1,6 @@
 'use client'
 import { useState } from 'react'
 import { useSignIn } from '@clerk/nextjs'
-import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -10,16 +9,18 @@ import { Leaf } from 'lucide-react'
 
 export default function LoginPage() {
   const { signIn, fetchStatus } = useSignIn()
-  const router = useRouter()
   const [email, setEmail]     = useState('')
   const [password, setPass]   = useState('')
   const [error, setError]     = useState('')
   const [loading, setLoading] = useState(false)
-  const isReady = fetchStatus !== 'fetching'
+  const isReady = fetchStatus === 'idle'
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!isReady || !signIn) return
+    if (!signIn) {
+      setError('La página todavía está cargando, intenta de nuevo.')
+      return
+    }
     setError('')
     setLoading(true)
 
@@ -27,24 +28,33 @@ export default function LoginPage() {
       const { error: signInError } = await signIn.create({ identifier: email, password })
 
       if (signInError) {
-        const msg = signInError.longMessage || signInError.message || 'Error al iniciar sesión'
+        const msg = signInError.longMessage || signInError.message || ''
         setError(msg.includes('password') ? 'Contraseña incorrecta' :
-                 msg.includes('identifier') || msg.includes('Identifier') ? 'Email no encontrado' : msg)
+                 msg.includes('identifier') || msg.includes('Identifier') || msg.includes('No se encontró') ? 'Email no encontrado' :
+                 msg || 'Error al iniciar sesión')
         return
       }
 
       if (signIn.status === 'complete') {
         const { error: finalizeError } = await signIn.finalize()
-        if (finalizeError) { setError(finalizeError.message || 'Error al iniciar sesión'); return }
+        if (finalizeError) {
+          setError(finalizeError.longMessage || finalizeError.message || 'Error al activar sesión')
+          return
+        }
         const res = await fetch('/api/auth/check-onboarding')
         const data = await res.json()
         window.location.href = data.completed ? '/dashboard' : '/onboarding'
+        return
       }
+
+      // Status no es 'complete' — situación inesperada
+      setError('No se pudo completar el inicio de sesión. Intenta de nuevo.')
     } catch (err: unknown) {
       const clerkErr = err as { errors?: Array<{ longMessage?: string; message: string }> }
-      const msg = clerkErr?.errors?.[0]?.longMessage || clerkErr?.errors?.[0]?.message || 'Error al iniciar sesión'
+      const msg = clerkErr?.errors?.[0]?.longMessage || clerkErr?.errors?.[0]?.message || ''
       setError(msg.includes('password') ? 'Contraseña incorrecta' :
-               msg.includes('Identifier') ? 'Email no encontrado' : msg)
+               msg.includes('Identifier') || msg.includes('identifier') ? 'Email no encontrado' :
+               msg || 'Error al iniciar sesión')
     } finally {
       setLoading(false)
     }
@@ -87,8 +97,8 @@ export default function LoginPage() {
               </div>
             )}
 
-            <Button type="submit" loading={loading} disabled={!email || !password}>
-              Iniciar sesión
+            <Button type="submit" loading={loading} disabled={!email || !password || !isReady}>
+              {isReady ? 'Iniciar sesión' : 'Cargando...'}
             </Button>
           </form>
 
