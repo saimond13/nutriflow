@@ -197,7 +197,7 @@ export default function RegistroPage() {
           <DialogTrigger asChild>
             <Button><Plus className="h-4 w-4" /> Agregar</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+          <DialogContent className="max-w-lg w-[calc(100vw-2rem)] max-h-[85vh] overflow-y-auto">
             <DialogHeader><DialogTitle>Registrar alimento</DialogTitle></DialogHeader>
 
             {/* Tipo de comida (siempre visible) */}
@@ -250,7 +250,7 @@ export default function RegistroPage() {
                 {recipeMode && (
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-xs text-slate-500">Porciones que rinde:</span>
-                    <div className="flex items-center gap-1">
+                    <div className="flex flex-wrap items-center gap-1">
                       {[1,2,3,4,5,6,8,10].map(n => (
                         <button key={n} onClick={() => setRecipeServings(n)}
                           className={cn(
@@ -493,16 +493,16 @@ export default function RegistroPage() {
               <CardContent>
                 <div className="flex flex-col gap-1.5">
                   {items.map(item => (
-                    <div key={item.id} className="flex items-center justify-between rounded-lg hover:bg-slate-50 px-2 py-1.5 group">
-                      <div className="flex-1 min-w-0">
+                    <div key={item.id} className="flex items-center justify-between rounded-lg hover:bg-slate-50 px-2 py-2 group">
+                      <div className="flex-1 min-w-0 pr-2">
                         <p className="text-sm font-medium text-slate-700 truncate">{item.food_name}</p>
                         <p className="text-xs text-slate-400">
                           {Math.round(parseFloat(item.calories))} kcal · P:{Math.round(parseFloat(item.protein_g))}g C:{Math.round(parseFloat(item.carbs_g))}g G:{Math.round(parseFloat(item.fat_g))}g
                         </p>
                       </div>
                       <button onClick={() => deleteEntry(item.id)}
-                        className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg hover:bg-red-50 text-slate-300 hover:text-red-500 transition-all">
-                        <Trash2 className="h-3.5 w-3.5" />
+                        className="shrink-0 p-2 rounded-lg text-slate-300 hover:bg-red-50 hover:text-red-500 active:bg-red-50 active:text-red-500 transition-all md:opacity-0 md:group-hover:opacity-100">
+                        <Trash2 className="h-4 w-4" />
                       </button>
                     </div>
                   ))}

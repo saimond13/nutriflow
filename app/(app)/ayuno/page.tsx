@@ -137,23 +137,23 @@ export default function AyunoPage() {
       {totalCount > 0 && (
         <div className="grid grid-cols-3 gap-2 md:gap-3 mb-6">
           <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-slate-800">{totalCount}</p>
-              <p className="text-xs text-slate-500">Sesiones totales</p>
+            <CardContent className="p-3 md:p-4 text-center">
+              <p className="text-xl md:text-2xl font-bold text-slate-800">{totalCount}</p>
+              <p className="text-[10px] md:text-xs text-slate-500 leading-tight">Sesiones</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-emerald-600">{completedCount}</p>
-              <p className="text-xs text-slate-500">Completadas</p>
+            <CardContent className="p-3 md:p-4 text-center">
+              <p className="text-xl md:text-2xl font-bold text-emerald-600">{completedCount}</p>
+              <p className="text-[10px] md:text-xs text-slate-500 leading-tight">Completadas</p>
             </CardContent>
           </Card>
           <Card>
-            <CardContent className="p-4 text-center">
-              <p className="text-2xl font-bold text-slate-800">
+            <CardContent className="p-3 md:p-4 text-center">
+              <p className="text-xl md:text-2xl font-bold text-slate-800">
                 {totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0}%
               </p>
-              <p className="text-xs text-slate-500">Adherencia</p>
+              <p className="text-[10px] md:text-xs text-slate-500 leading-tight">Adherencia</p>
             </CardContent>
           </Card>
         </div>
@@ -183,7 +183,7 @@ export default function AyunoPage() {
               <p className="text-xs text-slate-400 mb-1 uppercase tracking-wide">
                 {phase === 'fasting' ? 'Tiempo hasta poder comer' : 'Tiempo restante de alimentación'}
               </p>
-              <p className="text-5xl font-mono font-bold text-slate-800 tabular-nums">
+              <p className="text-4xl sm:text-5xl font-mono font-bold text-slate-800 tabular-nums">
                 {formatDuration(remaining)}
               </p>
               <p className="text-xs text-slate-400 mt-1">
@@ -289,19 +289,19 @@ export default function AyunoPage() {
                 const end     = new Date(s.ended_at)
                 const durationH = Math.round((end.getTime() - start.getTime()) / 3600000 * 10) / 10
                 return (
-                  <div key={s.id} className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-3">
-                    <div className="flex items-center gap-3">
+                  <div key={s.id} className="flex items-center justify-between rounded-xl bg-slate-50 px-3 py-2.5 gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
                       {s.completed
-                        ? <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-                        : <XCircle className="h-4 w-4 text-red-400" />
+                        ? <CheckCircle2 className="h-4 w-4 text-emerald-500 shrink-0" />
+                        : <XCircle className="h-4 w-4 text-red-400 shrink-0" />
                       }
-                      <div>
+                      <div className="min-w-0">
                         <p className="text-sm font-medium text-slate-700">{s.protocol}</p>
-                        <p className="text-xs text-slate-400">{formatDate(start)}</p>
+                        <p className="text-xs text-slate-400 truncate">{formatDate(start)}</p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <Badge variant={s.completed ? 'default' : 'secondary'}>
+                    <div className="text-right shrink-0">
+                      <Badge variant={s.completed ? 'default' : 'secondary'} className="text-xs">
                         {s.completed ? 'Completado' : 'Interrumpido'}
                       </Badge>
                       <p className="text-xs text-slate-400 mt-1">{durationH}h</p>

@@ -59,14 +59,14 @@ export default function EvolucionPage() {
 
   return (
     <div className="p-4 md:p-6 max-w-3xl mx-auto">
-      <div className="mb-6 flex items-center justify-between gap-3">
+      <div className="mb-6 flex items-start justify-between gap-3">
         <div>
           <h1 className="text-xl md:text-2xl font-bold text-slate-800">Mi Evolución</h1>
           <p className="text-sm text-slate-500">Seguimiento de peso y composición corporal</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
-            <Button><Plus className="h-4 w-4" /> Registrar medición</Button>
+            <Button size="sm" className="shrink-0"><Plus className="h-4 w-4" /> <span className="hidden sm:inline">Registrar medición</span><span className="sm:hidden">Registrar</span></Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader><DialogTitle>Nueva medición</DialogTitle></DialogHeader>
@@ -137,7 +137,7 @@ export default function EvolucionPage() {
                 <XAxis dataKey="date" tick={{ fontSize: 11, fill: '#94a3b8' }}
                   tickFormatter={d => d.slice(5)} />
                 <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }}
-                  domain={['auto', 'auto']} unit=" kg" width={52} />
+                  domain={['auto', 'auto']} unit=" kg" width={45} />
                 <Tooltip
                   formatter={(v: any) => [`${parseFloat(v).toFixed(1)} kg`, 'Peso']}
                   labelFormatter={l => `Fecha: ${l}`}
@@ -185,9 +185,9 @@ export default function EvolucionPage() {
                       <p className="text-sm font-medium text-slate-700">{m.logged_date}</p>
                       {m.notes && <p className="text-xs text-slate-400">{m.notes}</p>}
                     </div>
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-2 shrink-0">
                       {m.body_fat_pct && (
-                        <span className="text-xs text-slate-400">{parseFloat(m.body_fat_pct).toFixed(1)}% grasa</span>
+                        <span className="text-xs text-slate-400 hidden sm:inline">{parseFloat(m.body_fat_pct).toFixed(1)}% grasa</span>
                       )}
                       <div className="text-right">
                         <p className="font-semibold text-slate-800">{parseFloat(m.weight_kg).toFixed(1)} kg</p>

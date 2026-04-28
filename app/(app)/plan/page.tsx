@@ -74,15 +74,16 @@ export default function PlanPage() {
           <h1 className="text-xl md:text-2xl font-bold text-slate-800">Plato Semanal</h1>
           <p className="text-sm text-slate-500">Plan de comidas personalizado con IA</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2 justify-end">
           {plan && (
-            <Button variant="secondary" onClick={generateShoppingList} loading={genList}>
-              <ShoppingCart className="h-4 w-4" /> Generar canasta
+            <Button variant="secondary" size="sm" onClick={generateShoppingList} loading={genList}>
+              <ShoppingCart className="h-4 w-4" />
+              <span className="hidden sm:inline">Generar </span>Canasta
             </Button>
           )}
-          <Button onClick={generatePlan} loading={generating}>
+          <Button size="sm" onClick={generatePlan} loading={generating}>
             <Sparkles className="h-4 w-4" />
-            {plan ? 'Regenerar plan' : 'Generar plan con IA'}
+            {plan ? <><span className="hidden sm:inline">Regenerar </span>Plan</> : <><span className="hidden sm:inline">Generar con </span>IA</>}
           </Button>
         </div>
       </div>
@@ -202,9 +203,9 @@ export default function PlanPage() {
                                     <p className="text-xs font-semibold text-slate-600 mb-1.5">🛒 Ingredientes</p>
                                     <ul className="flex flex-col gap-1">
                                       {(item.ingredients as any[]).map((ing: any, k: number) => (
-                                        <li key={k} className="flex items-center justify-between text-xs text-slate-600 bg-white rounded-lg px-3 py-1.5 border border-slate-100">
-                                          <span>{ing.name}</span>
-                                          <span className="font-semibold text-slate-800">{ing.quantity} {ing.unit}</span>
+                                        <li key={k} className="flex items-center justify-between gap-2 text-xs text-slate-600 bg-white rounded-lg px-3 py-1.5 border border-slate-100">
+                                          <span className="flex-1 min-w-0">{ing.name}</span>
+                                          <span className="font-semibold text-slate-800 shrink-0">{ing.quantity} {ing.unit}</span>
                                         </li>
                                       ))}
                                     </ul>

@@ -115,7 +115,7 @@ export function Sidebar() {
       </aside>
 
       {/* ── Mobile top bar ── */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center gap-3 bg-white border-b border-slate-100 px-4 py-3">
+      <div className="md:hidden fixed top-0 left-0 right-0 z-40 flex items-center gap-3 bg-white border-b border-slate-100 px-4 py-3" style={{ paddingTop: 'max(0.75rem, env(safe-area-inset-top))' }}>
         <button onClick={() => setOpen(true)} className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-600">
           <Menu className="h-5 w-5" />
         </button>

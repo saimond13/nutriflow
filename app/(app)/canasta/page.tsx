@@ -163,10 +163,10 @@ export default function CanastaPage() {
                   <div className="flex flex-col gap-1.5">
                     {catItems.map(item => (
                       <button key={item.id} onClick={() => toggleItem(item.id, item.is_purchased)}
-                        className="flex items-center gap-3 rounded-xl p-2.5 text-left hover:bg-slate-50 transition-colors w-full group">
+                        className="flex items-center gap-3 rounded-xl p-3 text-left hover:bg-slate-50 active:bg-slate-100 transition-colors w-full group min-h-[48px]">
                         {item.is_purchased
-                          ? <CheckCircle className="h-5 w-5 text-emerald-500 shrink-0" />
-                          : <Circle className="h-5 w-5 text-slate-300 shrink-0 group-hover:text-emerald-300" />
+                          ? <CheckCircle className="h-6 w-6 text-emerald-500 shrink-0" />
+                          : <Circle className="h-6 w-6 text-slate-300 shrink-0 group-hover:text-emerald-300" />
                         }
                         <div className="flex-1 min-w-0">
                           <p className={`text-sm font-medium ${item.is_purchased ? 'line-through text-slate-400' : 'text-slate-700'}`}>
@@ -177,12 +177,14 @@ export default function CanastaPage() {
                             {item.substitute_for && ` · Reemplazo: ${item.substitute_for}`}
                           </p>
                         </div>
-                        {item.estimated_cost_usd && (
-                          <span className="text-xs text-slate-400 shrink-0">${item.estimated_cost_usd}</span>
-                        )}
-                        {item.is_optional && (
-                          <Badge variant="secondary" className="text-[10px] shrink-0">Opcional</Badge>
-                        )}
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          {item.estimated_cost_usd && (
+                            <span className="text-xs text-slate-400">${item.estimated_cost_usd}</span>
+                          )}
+                          {item.is_optional && (
+                            <Badge variant="secondary" className="text-[10px]">Opcional</Badge>
+                          )}
+                        </div>
                       </button>
                     ))}
                   </div>
